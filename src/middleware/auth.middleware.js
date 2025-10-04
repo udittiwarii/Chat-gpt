@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 
 
 
-async function authMiddleware(req, res, next) {
+async function authUser(req, res, next) {
 
     const { token } = req.cookies;
 
@@ -17,9 +17,9 @@ async function authMiddleware(req, res, next) {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET)// decode the code 
 
-        const user = await userModel.findById(decoded.id)// find the user using id from database
+        const user = await userModel.findOne(decoded.id)// find the user using id from database
 
-        req.body = user;
+        req.user = user;// set the user to the req object
 
         next()
 
@@ -32,4 +32,6 @@ async function authMiddleware(req, res, next) {
 }
 
 
-module.exports = authMiddleware;
+module.exports = {
+    authUser
+};

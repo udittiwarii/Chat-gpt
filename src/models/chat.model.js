@@ -1,10 +1,11 @@
 const mongoose = require('mongoose')
+const userModel = require('./user.model')
 
 // chat schema  for the user chat detail and the title from the req body and last activity
 const chatSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: user,
+        ref: 'user',
         required: true
     }, title: {
         type: String,

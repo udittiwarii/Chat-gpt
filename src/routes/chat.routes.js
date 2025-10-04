@@ -6,6 +6,6 @@ const chatController = require('../controllers/chat.controller')// require chat 
 const router = express.Router()
 
 // post /api/chat/
-router.post('/', authMiddleware, chatController)
+router.post('/', authMiddleware.authUser, chatController.createChat)
 
 module.exports = router;

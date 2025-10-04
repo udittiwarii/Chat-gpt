@@ -3,11 +3,11 @@ const chatModel = require('../models/chat.model')
 
 // controller for creating a new chat
 
-async function chatController(req, res) {
+async function createChat(req, res) {
 
-    const { title } = req.body
+    const { title } = req.body // get the title from the req body
 
-    const user = req.user
+    const user = req.user //get the user from the req object set by auth middleware
 
     try {
         // to create the new chat document
@@ -19,10 +19,12 @@ async function chatController(req, res) {
         return res.status(201).json({ message: 'chat created successfully', chat: newChat })
 
     } catch (err) {
-        return res.status(500).json({ message: 'Internal server error' })
-
+         console.log('error: ' , err)
+        return res.status(500).json({ message: 'Internal server error'  })
     }
 }
 
 
-module.exports = chatController
+module.exports = {
+    createChat
+}
