@@ -1,11 +1,40 @@
-const { Server } = require("socket.io");
+const { Server } = require("socket.io"); // import the socket io server
+const cookie = require('cookie')
+const jwt = require('jsonwebtoken')
+const userModel = require('../models/user.model')
+
+function initsocket(httpserver) {
+    const io = new Server(httpserver, {})// create a new socket io server
 
 
-function initsocket(httpserver){
-    const io = new Server(httpserver , {})
+    // middleware for socket io to authenticate the user
+    io.use(async (socket, next) => {
+        const cookies = cookie.parse(socket.handshake.headers?.cookie || '')// parse the cookies from the socket handshake headers
 
-    io.on("connection", (socket)=>{
-        console.log("New sokect connnected: " , socket.id)
+        if (!cookies.token) {
+            return next(new Error('Authentication error , token not found '))// if token not found
+        }
+
+        try {
+
+            const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET)
+
+
+            const user = await userModel.findOne(decoded.id)
+
+            socket.user = user // set the user to the socket object 
+
+            next(); // call the next middleware or the connection event
+
+
+        } catch (err) {
+            return next(new Error('Authentication error , token invalid'))// if token is invalid
+        }
+    })
+
+    // socket connection event
+    io.on("connection", (socket) => {
+        console.log("New sokect connnected: ", socket.id)
     })
 }
 
