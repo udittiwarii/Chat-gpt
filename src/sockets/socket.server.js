@@ -49,6 +49,8 @@ function initsocket(httpserver) {
             
             */
 
+
+            /*  save the user message in the database*/
             await messageModel.create({
                 user: socket.user._id,
                 chat: messagePayload.chat,
@@ -59,6 +61,7 @@ function initsocket(httpserver) {
 
             const response = await aiService.getAIResponse(messagePayload.content) // get the ai response from the ai service 
 
+            /* save the ai response in the database*/
             await messageModel.create({
                 user: socket.user._id,
                 chat: messagePayload.chat,
