@@ -1,7 +1,8 @@
-const { Server } = require("socket.io"); // import the socket io server
+const { Server } = require("socket.io"); // require the socket io server
 const cookie = require('cookie')
 const jwt = require('jsonwebtoken')
 const userModel = require('../models/user.model')
+const aiService = require('../service/ai.service') // require the ai service to get the ai response
 
 function initsocket(httpserver) {
     const io = new Server(httpserver, {})// create a new socket io server
@@ -34,7 +35,29 @@ function initsocket(httpserver) {
 
     // socket connection event
     io.on("connection", (socket) => {
-        console.log("New sokect connnected: ", socket.id)
+
+
+        socket.on('ai-message', async (messagePayload) => {
+
+            /*
+
+            messagePayload = {
+            chat: chatId,
+            content: messsage text content 
+            }
+            
+            */
+            console.log(messagePayload)
+
+            const response = await aiService.getAIResponse(messagePayload.content) // get the ai response from the ai service 
+            console.log(response)
+            // emit the ai-response event to the client
+            socket.emit('ai-response', {
+                content: response,
+                chat: messagePayload.chat
+            })
+        })
+
     })
 }
 
