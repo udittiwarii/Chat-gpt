@@ -9,7 +9,7 @@ function initsocket(httpserver) {
 
     // middleware for socket io to authenticate the user
     io.use(async (socket, next) => {
-        const cookies = cookie.parse(socket.handshake.headers?.cookie || '')// parse the cookies from the socket handshake headers
+        const cookies = cookie.parse(socket.handshake.headers?.cookie || '')// parse the cookies from the socket handshake headers 
 
         if (!cookies.token) {
             return next(new Error('Authentication error , token not found '))// if token not found
