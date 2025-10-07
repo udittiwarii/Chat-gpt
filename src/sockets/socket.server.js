@@ -61,10 +61,7 @@ function initsocket(httpserver) {
 
             const chatHistory = await messageModel.find({
                 chat: messagePayload.chat
-            })
-
-
-
+            }).sort({ createdAt: -1 }).limit(10).lean().reverse() // get the last 10 messages from the database for the chat
 
             const response = await aiService.getAIResponse(chatHistory.map(msg => {
                 return {
