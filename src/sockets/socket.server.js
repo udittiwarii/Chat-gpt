@@ -59,7 +59,19 @@ function initsocket(httpserver) {
             })
 
 
-            const response = await aiService.getAIResponse(messagePayload.content) // get the ai response from the ai service 
+            const chatHistory = await messageModel.find({
+                chat: messagePayload.chat
+            })
+
+
+
+
+            const response = await aiService.getAIResponse(chatHistory.map(msg => {
+                return {
+                    role: msg.role,
+                    parts: [{ text: msg.content }]
+                }
+            })) // get the ai response from the ai service 
 
             /* save the ai response in the database*/
             await messageModel.create({
