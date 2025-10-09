@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken')
 const userModel = require('../models/user.model')
 const aiService = require('../service/ai.service') // require the ai service to get the ai response
 const messageModel = require('../models/message.model')
+const { createMemmory, queryMemmory } = require('../service/Vectordatabase.service') // require the vector database service to store and query the vectors
+
+
 
 function initsocket(httpserver) {
     const io = new Server(httpserver, {})// create a new socket io server
@@ -51,12 +54,34 @@ function initsocket(httpserver) {
 
 
             /*  save the user message in the database*/
-            await messageModel.create({
+            const message = await messageModel.create({
                 user: socket.user._id,
                 chat: messagePayload.chat,
                 content: messagePayload.content,
                 role: 'user'
             })
+
+
+            const vectors = await aiService.vectorGenration(messagePayload.content)
+
+            const memmory = await queryMemmory({
+                queryVector: vectors,
+                limit: 3,
+                metadata: {
+                    userId: socket.user._id
+                }
+            })
+
+            await createMemmory({
+                vectors,
+                metadata: {
+                    userId: socket.user._id,
+                    content: messagePayload.content
+                },
+                messageId: message._id
+            })
+
+            console.log(memmory)
 
 
             const chatHistory = await messageModel.find({

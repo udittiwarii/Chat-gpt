@@ -13,7 +13,20 @@ async function getAIResponse(content) {
     return response.text  // to return the response for teh prompt(content)
 }
 
+async function vectorGenration(content) {
+    const response = await ai.models.embedContent({
+        model: 'gemini-embedding-001',
+        contents: content,
+        config: {
+            outputDimension: 768
+        }
+    })
+
+    return response.embeddings[0].values  // to return the response for teh prompt(content)
+}
+
 
 module.exports = {
-    getAIResponse
+    getAIResponse,
+    vectorGenration
 }
