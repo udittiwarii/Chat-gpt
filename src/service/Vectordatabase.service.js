@@ -8,11 +8,12 @@ const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 const chatgptIndex = pc.Index('chatgpt');
 
 async function createMemmory({ vectors, metadata, messageId }) {
-    await chatgptIndex.upsert({
+    if(!messageId) throw new Error('Message ID is required to create memory' )
+    await chatgptIndex.upsert([{
         id: messageId,
         values: vectors,
         metadata: metadata
-    })
+    }])
 }
 
 
