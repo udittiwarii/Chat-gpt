@@ -22,7 +22,9 @@ async function vectorGenration(content) {
         }
     })
 
-    return response.embeddings[0].values  // to return the response for teh prompt(content)
+    const fullvector = response.embeddings[0].values;
+    const turnedVector = fullvector.slice(0, 768)
+    return turnedVector // to return the response for teh prompt(content)
 }
 
 

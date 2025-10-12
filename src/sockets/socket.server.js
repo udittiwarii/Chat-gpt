@@ -42,16 +42,12 @@ function initsocket(httpserver) {
 
 
         socket.on('ai-message', async (messagePayload) => {
-
             /*
-
             messagePayload = {
             chat: chatId,
             content: messsage text content 
-            }
-            
+            } 
             */
-
 
             /*  save the user message in the database*/
             const message = await messageModel.create({
@@ -61,10 +57,9 @@ function initsocket(httpserver) {
                 role: 'user'
             })
 
-
             const vectors = await aiService.vectorGenration(messagePayload.content)
 
-            const memmory = await queryMemmory({
+            const queryResults = await queryMemmory({
                 queryVector: vectors,
                 limit: 3,
                 metadata: {
@@ -76,31 +71,66 @@ function initsocket(httpserver) {
                 vectors,
                 metadata: {
                     userId: socket.user._id,
-                    content: messagePayload.content
+                    chat: messagePayload.chat,
+                    text: messagePayload.content
                 },
-                messageId: message._id
+                messageId: message._id.toString()
             })
 
-            console.log(memmory)
-
-
-            const chatHistory = await messageModel.find({
+            const chatHistory = (await messageModel.find({
                 chat: messagePayload.chat
-            }).sort({ createdAt: -1 }).limit(10).lean().reverse() // get the last 10 messages from the database for the chat
+            }).sort({ createdAt: -1 }).limit(10).lean()).reverse()
 
-            const response = await aiService.getAIResponse(chatHistory.map(msg => {
+
+            const stm = chatHistory.map(item => {
                 return {
-                    role: msg.role,
-                    parts: [{ text: msg.content }]
+                    role: item.role,
+                    parts: [{ text: item.content }]
                 }
-            })) // get the ai response from the ai service 
+            })
+
+            const ltm = [
+                {
+                    role: "user",
+                    parts: [{
+                        text: `
+
+                        these are some previous messages from the chat, use them to generate a response
+
+                        ${queryResults.map(item => item.metadata.text).join("\n")}
+                        
+                        ` }]
+                }
+            ]
+
+
+
+            console.log('long term memory ', ltm[0].parts[0].text)
+            console.log('short term memory ', stm)
+
+
+            const finalprompt = [...ltm, ...stm]
+
+            const response = await aiService.getAIResponse(finalprompt) // get the ai response from the ai service
 
             /* save the ai response in the database*/
-            await messageModel.create({
+            const aimessage = await messageModel.create({
                 user: socket.user._id,
                 chat: messagePayload.chat,
                 content: response,
                 role: 'model'
+            })
+
+            const responseVectors = await aiService.vectorGenration(response)
+
+            await createMemmory({
+                messageId: aimessage._id,
+                vectors: responseVectors,
+                metadata: {
+                    userId: socket.user._id,
+                    chat: messagePayload.chat,
+                    text: response
+                }
             })
 
             // emit the ai-response event to the client
