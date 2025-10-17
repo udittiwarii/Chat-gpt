@@ -1,16 +1,14 @@
-const { GoogleGenAI } = require('@google/genai') // require googlegenai 
+const { GoogleGenAI } = require("@google/genai");
 
+// The client gets the API key from the environment variable `GEMINI_API_KEY`.
+const ai = new GoogleGenAI({});
 
-const ai = new GoogleGenAI({})// initialize the google gen ai client
-
-
-async function getAIResponse(content) {
+async function genrateContent(prompt) {
     const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash', // model of the gemini 
-        contents: content // the prompt or the message content
-    })
-
-    return response.text  // to return the response for teh prompt(content)
+        model: "gemini-2.0-flash",
+        contents: prompt,
+    });
+    return response.text;
 }
 
 async function vectorGenration(content) {
@@ -29,6 +27,6 @@ async function vectorGenration(content) {
 
 
 module.exports = {
-    getAIResponse,
+    genrateContent,
     vectorGenration
 }

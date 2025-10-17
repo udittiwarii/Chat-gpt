@@ -1,57 +1,39 @@
-const { Server } = require("socket.io"); // require the socket io server
+const { Server, Socket } = require("socket.io");
 const cookie = require('cookie')
 const jwt = require('jsonwebtoken')
-const userModel = require('../models/user.model')
-const aiService = require('../service/ai.service') // require the ai service to get the ai response
-const messageModel = require('../models/message.model')
-const { createMemmory, queryMemmory } = require('../service/Vectordatabase.service') // require the vector database service to store and query the vectors
+const userModel = require('../model/user.model')
+const aiService = require('../service/ai.service')
+const messageModel = require('../model/message.model')
+const { createMemmory, queryMemmory } = require('../service/Vectordatabase.service')
 
+async function intialsocket(httpserver) {
+    const io = new Server(httpserver, {});// create socket io server
 
-
-function initsocket(httpserver) {
-    const io = new Server(httpserver, {})// create a new socket io server
-
-
-    // middleware for socket io to authenticate the user
-    io.use(async (socket, next) => {
-        const cookies = cookie.parse(socket.handshake.headers?.cookie || '')// parse the cookies from the socket handshake headers 
+    io.use(async (Socket, next) => {
+        const cookies = cookie.parse(Socket.handshake.headers?.cookie || '')
 
         if (!cookies.token) {
-            return next(new Error('Authentication error , token not found '))// if token not found
+            return next(new Error('Authentication error , token not found'))
         }
 
         try {
-
             const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET)
 
+            const user = await userModel.findById(decoded.id)
 
-            const user = await userModel.findOne(decoded.id)
+            Socket.user = user
 
-            socket.user = user // set the user to the socket object 
-
-            next(); // call the next middleware or the connection event
-
-
+            next()
         } catch (err) {
-            return next(new Error('Authentication error , token invalid'))// if token is invalid
+            return next(new Error('Authentication error , token invalid'))
         }
     })
 
-    // socket connection event
-    io.on("connection", (socket) => {
+    io.on("connection", (Socket) => {
+        Socket.on('ai-message', async (messagePayload) => {
 
-
-        socket.on('ai-message', async (messagePayload) => {
-            /*
-            messagePayload = {
-            chat: chatId,
-            content: messsage text content 
-            } 
-            */
-
-            /*  save the user message in the database*/
             const message = await messageModel.create({
-                user: socket.user._id,
+                user: Socket.user._id,
                 chat: messagePayload.chat,
                 content: messagePayload.content,
                 role: 'user'
@@ -59,89 +41,85 @@ function initsocket(httpserver) {
 
             const vectors = await aiService.vectorGenration(messagePayload.content)
 
-            const queryResults = await queryMemmory({
-                queryVector: vectors,
+            const queryResult = await queryMemmory({
+                queryvector: vectors,
                 limit: 3,
                 metadata: {
-                    userId: socket.user._id
+                    userId: Socket.user._id
                 }
             })
 
             await createMemmory({
-                vectors,
+                vector: vectors,
                 metadata: {
-                    userId: socket.user._id,
-                    chat: messagePayload.chat,
+                    userId: Socket.user._id,
+                    chatId: messagePayload.chat,
                     text: messagePayload.content
                 },
                 messageId: message._id.toString()
+
             })
+
+
+
+            console.log(queryResult)
 
             const chatHistory = (await messageModel.find({
                 chat: messagePayload.chat
             }).sort({ createdAt: -1 }).limit(10).lean()).reverse()
 
-
-            const stm = chatHistory.map(item => {
+            const stm = chatHistory.map(itm => {
                 return {
-                    role: item.role,
-                    parts: [{ text: item.content }]
+                    role: itm.role,
+                    parts: [{ text: itm.content }]
                 }
             })
 
-            const ltm = [
-                {
-                    role: "user",
-                    parts: [{
-                        text: `
-
-                        these are some previous messages from the chat, use them to generate a response
-
-                        ${queryResults.map(item => item.metadata.text).join("\n")}
-                        
-                        ` }]
-                }
-            ]
+            const ltm = [{
+                role: 'user',
+                parts: [{
+                    text: `
+                    
+                       these are some previous messages from the chat, use them to generate a response
 
 
+                   ${(queryResult.matches || []).map(item => item.metadata.text).join("\n")}
+                    `
+                }]
+            }]
 
-            console.log('long term memory ', ltm[0].parts[0].text)
-            console.log('short term memory ', stm)
 
 
-            const finalprompt = [...ltm, ...stm]
+            const finalPrompt = [...ltm, ...stm]
 
-            const response = await aiService.getAIResponse(finalprompt) // get the ai response from the ai service
+            const response = await aiService.genrateContent(finalPrompt)
 
-            /* save the ai response in the database*/
-            const aimessage = await messageModel.create({
-                user: socket.user._id,
+            const aimessge = await messageModel.create({
+                user: Socket.user._id,
                 chat: messagePayload.chat,
                 content: response,
                 role: 'model'
             })
 
-            const responseVectors = await aiService.vectorGenration(response)
+            const responsevector = await aiService.vectorGenration(response)
 
             await createMemmory({
-                messageId: aimessage._id,
-                vectors: responseVectors,
+                vector: responsevector,
                 metadata: {
-                    userId: socket.user._id,
+                    userId: Socket.user._id,
                     chat: messagePayload.chat,
                     text: response
-                }
+                },
+                messageId: aimessge._id
             })
 
-            // emit the ai-response event to the client
-            socket.emit('ai-response', {
+            Socket.emit('ai-response', {
                 content: response,
                 chat: messagePayload.chat
             })
         })
-
     })
 }
 
 
-module.exports = initsocket
+module.exports = intialsocket;
