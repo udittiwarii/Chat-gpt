@@ -1,33 +1,36 @@
-// require the Pinecone library
+// Import the Pinecone library
 const { Pinecone } = require('@pinecone-database/pinecone')
 
 // Initialize a Pinecone client with your API key
-const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
+const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY })
 
-// Create a dense index with integrated embedding
+
 const chatgptIndex = pc.Index('chatgpt');
 
-async function createMemmory({ vectors, metadata, messageId }) {
-    if(!messageId) throw new Error('Message ID is required to create memory' )
+async function createMemmory({ vector, metadata, messageId }) {
+      if (!vector || !Array.isArray(vector) || vector.length === 0) {
+        throw new Error('Invalid vector: Must be a non-empty array of numbers');
+    }
     await chatgptIndex.upsert([{
         id: messageId,
-        values: vectors,
+        values: vector,
         metadata: metadata
     }])
 }
 
 
-async function queryMemmory({ queryVector, limit = 5, metadata }) {
-    const results = await chatgptIndex.query({
-        vector: queryVector,
+async function queryMemmory({ queryvector, limit = 5, metadata }) {
+    const result = await chatgptIndex.query({
+        vector: queryvector,
         topK: limit,
         filter: metadata ? metadata : undefined,
         includeMetadata: true
-    });
-    return results.matches;
+    })
+
+    return result
 }
 
 module.exports = {
     createMemmory,
     queryMemmory
-};
+}

@@ -1,13 +1,13 @@
-require('dotenv').config()
-const app = require('./src/app')
-const ConnectDB = require('./src/db/db')
-const initsocket = require('./src/sockets/socket.server')
-const httpServer = require('http').createServer(app)
+require('dotenv').config() // require dotenv
+const app = require('./src/app')// require app.js
+const connectDB = require('./src/db/db') // require db.js
+const intialsocket = require('./src/sockets/socket.server')
+const httpserver = require('http').createServer(app)
 
-ConnectDB()// calling mongodb to connect
-initsocket(httpServer)
+connectDB() // connect to database
+intialsocket(httpserver)// call the socket function
 
-
-httpServer.listen(3000, () => {
-    console.log('server is running on port 3000')// start surver
+// server running 
+httpserver.listen(3000, () => {
+    console.log("server is running on port 3000")
 })

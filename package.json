@@ -7,12 +7,20 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx nodemon server.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/udittiwarii/Chat-gpt.git"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/udittiwarii/Chat-gpt/issues"
+  },
+  "homepage": "https://github.com/udittiwarii/Chat-gpt#readme",
   "dependencies": {
-    "@google/genai": "^1.22.0",
+    "@google/genai": "^1.25.0",
     "@pinecone-database/pinecone": "^6.1.2",
     "bcryptjs": "^3.0.2",
     "cookie": "^1.0.2",
@@ -20,7 +28,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.18.3",
+    "mongoose": "^8.19.1",
     "socket.io": "^4.8.1"
   }
 }

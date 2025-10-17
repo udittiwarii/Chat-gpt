@@ -1,7 +1,6 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-
-const messageSchema = new mongoose.Schema({
+const messageSchema = mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
@@ -9,12 +8,12 @@ const messageSchema = new mongoose.Schema({
     },
     chat: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'chat',
+        ref: "chat",
         required: true
     },
     content: {
         type: String,
-        required: true
+        require: true
     },
     role: {
         type: String,
@@ -25,10 +24,8 @@ const messageSchema = new mongoose.Schema({
     {
         timestamps: true
     }
-)
+);
 
-
-const messageModel = mongoose.model('message', messageSchema)
-
+const messageModel = mongoose.model('message', messageSchema);
 
 module.exports = messageModel;
