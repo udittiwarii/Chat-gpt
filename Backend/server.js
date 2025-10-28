@@ -1,13 +1,19 @@
-require('dotenv').config() // require dotenv
-const app = require('../src/app')// require app.js
-const connectDB = require('../src/db/db') // require db.js
-const intialsocket = require('../src/sockets/socket.server')
-const httpserver = require('http').createServer(app)
+require('dotenv').config(); // load env vars
+const app = require('./src/app'); // import express app
+const connectDB = require('./src/db/db'); // correct path
+const initSocket = require('./src/sockets/socket.server'); // correct path
+const http = require('http');
 
-connectDB() // connect to database
-intialsocket(httpserver)// call the socket function
+// create HTTP server
+const httpServer = http.createServer(app);
 
-// server running 
-httpserver.listen(3000, () => {
-    console.log("server is running on port 3000")
-})
+// connect to database
+connectDB();
+
+// initialize socket.io
+initSocket(httpServer);
+
+// start the server
+httpServer.listen(3000, () => {
+    console.log("✅ Server is running on port 3000");
+});
