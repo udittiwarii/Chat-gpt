@@ -1,0 +1,79 @@
+/* Page-level styles for auth pages and small components (mobile-first) */
+@import './theme.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body{
+  margin:0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+.auth-page{
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.card{
+  width: 100%;
+  max-width: 720px;
+  background: linear-gradient(180deg, var(--panel), var(--panel));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  border: 1px solid var(--input-border);
+}
+
+.card--narrow{ max-width: 480px; }
+
+.header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 12px; }
+.header h1, .header h2{ margin:0; font-weight:600 }
+.header p{ margin:0; color:var(--muted); font-size:0.95rem }
+
+.form{ display:grid; gap:12px; margin-top:8px }
+.form-row{ display:grid; gap:8px }
+.form-group{ display:flex; flex-direction:column; gap:8px }
+.label{ font-size:0.9rem; color:var(--muted) }
+.input{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  background: var(--input-bg);
+  border:1px solid var(--input-border);
+  color:var(--text);
+  outline:none;
+  font-size:1rem;
+}
+.input::placeholder{ color: rgba(0,0,0,0.35); }
+
+.actions{ display:flex; gap:10px; align-items:center; margin-top:6px }
+.btn{
+  padding:12px 16px;
+  border-radius:10px;
+  border: none;
+  cursor: pointer;
+  font-weight:600;
+  font-size:0.98rem;
+  background: var(--accent);
+  color: #fff;
+}
+/* Buttons should follow system theme because variables above switch with prefers-color-scheme */
+
+.secondary{ background: transparent; color:var(--text); border:1px solid var(--input-border); }
+
+.helper{ color:var(--muted); font-size:0.92rem }
+
+.links{ display:flex; gap:10px; margin-top:12px }
+.links a{ color:var(--accent); text-decoration:none; font-weight:600 }
+
+/* Responsive: at wider screens make layout split in two columns for register form if desired */
+@media (min-width: 900px){
+  .card{ display:flex; gap:24px; align-items:center; padding:28px }
+  .card--narrow{ max-width:680px }
+}

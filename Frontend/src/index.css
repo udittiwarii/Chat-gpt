@@ -1,0 +1,6 @@
+@import './styles/theme.css';
+@import './styles/pages.css';
+
+/* Global app-level baseline (imports theme and page styles) */
+html, body, #root { height:100%; }
+/* additional global tweaks can go here */
