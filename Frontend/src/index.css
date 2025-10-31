@@ -1,6 +1,9 @@
-@import './styles/theme.css';
-@import './styles/pages.css';
+@import "tailwindcss";
 
-/* Global app-level baseline (imports theme and page styles) */
-html, body, #root { height:100%; }
-/* additional global tweaks can go here */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease;
+}
