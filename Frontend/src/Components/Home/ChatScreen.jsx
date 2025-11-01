@@ -1,24 +1,82 @@
+import React, { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
+import { Menu } from "lucide-react";
 
-const ChatScreen = ({ chats, setChats, input, setInput }) => {
+const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
-    <div className="flex flex-col w-full h-full">
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-[#343541]">
-        {chats.length === 0 ? (
-          <div className="text-center text-gray-400 mt-20 text-lg">
-            Start a new chat to talk with your AI assistant 💬
+    <div className="flex flex-col w-full h-full bg-[#1E1F23] text-[#ECECF1]">
+      {/* ✅ Navbar */}
+      <nav
+        className="
+          w-full flex items-center justify-between 
+          px-5 py-3 
+          border-b border-[#3A3B3F]
+          sm:border-none sm:bg-transparent
+          bg-[#2C2D31] sm:bg-transparent
+          fixed sm:static top-0 left-0 right-0 z-20
+        "
+      >
+        <div className="flex items-center gap-2">
+          {/* 👇 Shift title right only on mobile */}
+          <h1 className="font-semibold text-lg md:text-xl ml-10 sm:ml-0">
+            ChatGPT
+          </h1>
+        </div>
+        <div className="hidden sm:flex gap-6 text-sm pr-4">
+          <button className="font-semibold text-lg md:text-xl">Share</button>
+        </div>
+      </nav>
+
+      {/* ✅ Chat messages area */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#3A3B3F] pt-14 sm:pt-0">
+        {!activeChat ? (
+          <div className="h-full flex flex-col items-center justify-center text-center px-4">
+            <h1 className="text-4xl font-semibold mb-4 text-[#ECECF1]">ChatGPT</h1>
+            <p className="text-[#9C9CA3] text-lg max-w-md">
+              Start a new chat to begin your conversation with AI
+            </p>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center px-4">
+            <h2 className="text-2xl font-semibold mb-2 text-[#ECECF1]">
+              {activeChat.title}
+            </h2>
+            <p className="text-[#9C9CA3]">
+              Send a message to start the conversation
+            </p>
           </div>
         ) : (
-          chats.map((msg, i) => (
-            <ChatMessage key={i} sender={msg.sender} text={msg.text} />
-          ))
+          <div className="max-w-3xl mx-auto w-full py-4 px-2 sm:px-4">
+            {messages.map((msg, i) => (
+              <ChatMessage key={i} message={msg} />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
         )}
       </div>
 
-      {/* Input Area */}
-      <ChatInput input={input} setInput={setInput} setChats={setChats} />
+      {/* ✅ Input Area */}
+      <div className="border-t border-[#3A3B3F] bg-[#2C2D31] sm:bg-transparent">
+        <div className="max-w-3xl mx-auto w-full px-4 py-4">
+          <ChatInput
+            input={input}
+            setInput={setInput}
+            setMessages={setMessages}
+            disabled={!activeChat}
+          />
+        </div>
+      </div>
     </div>
   );
 };
