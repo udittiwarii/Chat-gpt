@@ -7,3 +7,7 @@
 .animate-fadeIn {
   animation: fadeIn 0.3s ease;
 }
+
+*{
+  font-family: 'Inter', 'Segoe UI', 'Fira Code', "monospace";
+}

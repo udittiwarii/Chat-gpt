@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { SiOpenai } from "react-icons/si";
-import { TbLayoutSidebar } from "react-icons/tb";
-import { FiMenu, FiX, FiMessageSquare, FiPlus } from "react-icons/fi";
+import { FiMenu, FiX } from "react-icons/fi";
+import SidebarHeader from "./SidebarComponents/SidebarHeader";
+import NewChatButton from "./SidebarComponents/NewChatButton";
+import SectionTabs from "./SidebarComponents/SectionTabs";
+import ChatList from "./SidebarComponents/ChatList";
 
 const Sidebar = ({ setActiveChat }) => {
-  const [isOpen, setIsOpen] = useState(false); // mobile sidebar toggle
-  const [isExpanded, setIsExpanded] = useState(true); // desktop expand toggle
+  const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [hovered, setHovered] = useState(false);
   const [showHoverIcon, setShowHoverIcon] = useState(false);
+  const [activeSection, setActiveSection] = useState("chats");
 
-  const chats = [
-    "New Chat",
-    "Project Discussion",
-    "AI Interview Help",
-    "Code Debugging",
-  ];
+  const [chats, setChats] = useState([
+    { id: 1, title: "Understanding React Hooks", isArchived: false },
+    { id: 2, title: "API Integration Best Practices", isArchived: false },
+    { id: 3, title: "CSS Grid Layout Tutorial", isArchived: true },
+  ]);
 
-  // smooth hover delay like ChatGPT
   useEffect(() => {
     let timer;
     if (hovered && !isExpanded) {
@@ -30,106 +31,81 @@ const Sidebar = ({ setActiveChat }) => {
   const toggleSidebar = () => setIsOpen(!isOpen);
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
+  const createNewChat = () => {
+    if (!isExpanded) setIsExpanded(true); // expand first if collapsed
+    const newChat = { id: Date.now(), title: "New Chat", isArchived: false };
+    setChats([newChat, ...chats]);
+    setActiveChat(newChat);
+  };
+
+  const archiveChat = (chatId) => {
+    setChats(chats.map(chat => chat.id === chatId ? { ...chat, isArchived: true } : chat));
+  };
+
+  const deleteChat = (chatId) => {
+    setChats(chats.filter(chat => chat.id !== chatId));
+  };
+
+
+  const filteredChats = chats.filter(chat =>
+    activeSection === "chats" ? !chat.isArchived : chat.isArchived
+  );
+
+  const renameChat = (chatId, newTitle) => {
+    setChats(chats.map(chat =>
+      chat.id === chatId ? { ...chat, title: newTitle } : chat
+    ));
+  };
+
   return (
     <>
-      {/* Mobile Navbar */}
-      <div className="md:hidden flex justify-between items-center p-4 bg-[#202123] text-gray-200 border-b border-[#343541]">
-        <div className="flex items-center gap-2 text-lg font-semibold">
-          <SiOpenai className="text-white text-xl" />
-          ChatGPT
-        </div>
-        <button onClick={toggleSidebar}>
-          {isOpen ? <FiX size={22} /> : <FiMenu size={22} />}
-        </button>
-      </div>
+      {/* 🟢 Mobile Floating Hamburger Button */}
+      <button
+        onClick={toggleSidebar}
+        className="md:hidden fixed top-2 left-4 z-50 p-2 rounded-md  hover:bg-[#2a2b32] transition-colors"
+      >
+        {isOpen ? <FiX className="text-white w-5 h-5" /> : <FiMenu className="text-white w-5 h-5" />}
+      </button>
 
-      {/* Sidebar */}
+      {/* Sidebar Container */}
       <div
         className={`fixed md:static top-0 left-0 h-full transition-all duration-300 
-        bg-[#202123] border-r border-[#343541] text-gray-200 
-        ${isExpanded ? "md:w-64" : "md:w-16"} 
-        ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 z-50`}
+          bg-[#202123] border-r border-[#343541] text-gray-200 
+          ${isExpanded ? "md:w-64" : "md:w-16"} 
+          ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 z-40`}
+        onClick={() => {
+          if (!isExpanded && window.innerWidth >= 768) setIsExpanded(true);
+        }}
       >
-        {/* Header Section */}
-        <div className="relative flex items-center justify-center md:justify-between h-16 border-b border-[#343541] px-3">
-          <div
-            className="relative cursor-pointer flex items-center justify-center"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-          >
-            {/* OpenAI Icon */}
-            <SiOpenai
-              className={`text-xl text-white transition-opacity duration-200 ${
-                showHoverIcon && !isExpanded ? "opacity-0" : "opacity-100"
-              }`}
-            />
+        <SidebarHeader
+          isExpanded={isExpanded}
+          hovered={hovered}
+          showHoverIcon={showHoverIcon}
+          setHovered={setHovered}
+          toggleExpand={toggleExpand}
+        />
 
-            {/* Hover Icon (only visible when collapsed) */}
-            {!isExpanded && (
-              <div
-                className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
-                  showHoverIcon ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
-                onClick={toggleExpand}
-              >
-                <div className="p-2 rounded-full bg-[#343541] hover:bg-[#40414f] border border-gray-700">
-                  <TbLayoutSidebar className="text-gray-200 text-xl" />
-                </div>
-              </div>
-            )}
-          </div>
+        <NewChatButton createNewChat={createNewChat} isExpanded={isExpanded} />
 
-          {isExpanded && (
-            <button
-              className="hidden md:block text-gray-400 hover:text-white"
-              onClick={toggleExpand}
-            >
-              <TbLayoutSidebar className="text-xl" />
-            </button>
-          )}
-        </div>
-
-        {/* Chat History */}
         {isExpanded && (
-          <div className="p-4 text-sm uppercase font-semibold text-gray-400 tracking-wide">
-            Chat History
-          </div>
+          <SectionTabs activeSection={activeSection} setActiveSection={setActiveSection} />
         )}
 
-        {/* Chat List */}
-        {isExpanded && (
-          <div className="flex-1 overflow-y-auto pb-8 scrollbar-thin scrollbar-thumb-[#343541] scrollbar-track-[#202123]">
-            {chats.map((chat, i) => (
-              <div
-                key={i}
-                onClick={() => {
-                  setActiveChat(chat);
-                  setIsOpen(false);
-                }}
-                className="flex items-center gap-3 p-3 mx-2 mb-1 rounded-lg cursor-pointer hover:bg-[#343541] transition-colors duration-200"
-              >
-                <FiMessageSquare className="text-gray-300" />
-                <span>{chat}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Bottom Button */}
-        {isExpanded && (
-          <div className="border-t border-[#343541] p-4 flex items-center gap-3 hover:bg-[#343541] cursor-pointer transition-colors">
-            <FiPlus />
-            <span>New Chat</span>
-          </div>
-        )}
+        <ChatList
+          chats={filteredChats}
+          isExpanded={isExpanded}
+          activeSection={activeSection}
+          setActiveChat={setActiveChat}
+          archiveChat={archiveChat}
+          deleteChat={deleteChat}
+          renameChat={renameChat}
+          setIsOpen={setIsOpen}
+        />
       </div>
 
       {/* Mobile Overlay */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-40"
-          onClick={toggleSidebar}
-        ></div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-30" onClick={toggleSidebar} />
       )}
     </>
   );

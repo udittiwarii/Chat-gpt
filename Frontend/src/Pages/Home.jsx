@@ -3,24 +3,32 @@ import ChatScreen from "../Components/Home/ChatScreen";
 import Sidebar from "../Components/Home/Sidebar";
 
 const Home = () => {
-  const [chats, setChats] = useState([]); // all messages
-  const [input, setInput] = useState(""); // current input
-  const [activeChat, setActiveChat] = useState("New Chat"); // current chat
+  const [activeChat, setActiveChat] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+
+  // When a new chat is selected, clear the messages
+  const handleChatChange = (chat) => {
+    setActiveChat(chat);
+    setMessages([]); // In a real app, you'd load messages for this chat
+    setInput("");
+  };
 
   return (
-    <div className="flex h-screen w-screen bg-[#343541] text-gray-100 overflow-hidden">
-      {/* Sidebar (responsive inside Sidebar component) */}
-      <Sidebar setActiveChat={setActiveChat} />
+    <div className="flex h-screen w-screen bg-[#343541] overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar setActiveChat={handleChatChange} />
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col h-full">
+      <main className="flex-1 relative flex flex-col h-full">
         <ChatScreen
-          chats={chats}
-          setChats={setChats}
+          activeChat={activeChat}
+          messages={messages}
+          setMessages={setMessages}
           input={input}
           setInput={setInput}
         />
-      </div>
+      </main>
     </div>
   );
 };
