@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiMessageSquare, FiMoreHorizontal } from "react-icons/fi";
+import {  FiMoreHorizontal } from "react-icons/fi";
 
 const ChatItem = ({
   chat,
@@ -43,7 +43,6 @@ const ChatItem = ({
     >
       {/* 🧠 Chat Icon + Title */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <FiMessageSquare className="text-[#8e8ea0] shrink-0" />
         {isExpanded && <span className="truncate text-[#ececf1]">{chat.title}</span>}
       </div>
 

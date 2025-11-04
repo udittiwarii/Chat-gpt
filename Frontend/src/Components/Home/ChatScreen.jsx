@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { Menu } from "lucide-react";
+import socket from "../../Utils/socket";
 
 const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
   const messagesEndRef = useRef(null);
@@ -13,6 +14,24 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const handleAIresponse = (data) => {
+      if (!activeChat?._id) return;
+      if (data.chat === activeChat._id) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.content },
+        ]);
+      }
+      if (process.env.NODE_ENV === "development") {
+        console.log("AI response received:", data);
+      }
+    };
+
+    socket.on("ai-response", handleAIresponse);
+    return () => socket.off("ai-response", handleAIresponse);
+  }, [activeChat, setMessages]);
 
   return (
     <div className="flex flex-col w-full h-full bg-[#1E1F23] text-[#ECECF1]">
@@ -59,7 +78,7 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
         ) : (
           <div className="max-w-3xl mx-auto w-full py-4 px-2 sm:px-4">
             {messages.map((msg, i) => (
-              <ChatMessage key={i} message={msg} />
+              <ChatMessage key={i} message={msg} activeChat={activeChat} setMessages={setMessages} />
             ))}
             <div ref={messagesEndRef} />
           </div>
@@ -74,6 +93,7 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
             setInput={setInput}
             setMessages={setMessages}
             disabled={!activeChat}
+            activeChat={activeChat}
           />
         </div>
       </div>

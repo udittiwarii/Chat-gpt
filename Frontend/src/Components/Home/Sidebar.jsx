@@ -4,6 +4,7 @@ import SidebarHeader from "./SidebarComponents/SidebarHeader";
 import NewChatButton from "./SidebarComponents/NewChatButton";
 import SectionTabs from "./SidebarComponents/SectionTabs";
 import ChatList from "./SidebarComponents/ChatList";
+import axios from "axios";
 
 const Sidebar = ({ setActiveChat }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,9 +14,6 @@ const Sidebar = ({ setActiveChat }) => {
   const [activeSection, setActiveSection] = useState("chats");
 
   const [chats, setChats] = useState([
-    { id: 1, title: "Understanding React Hooks", isArchived: false },
-    { id: 2, title: "API Integration Best Practices", isArchived: false },
-    { id: 3, title: "CSS Grid Layout Tutorial", isArchived: true },
   ]);
 
   useEffect(() => {
@@ -31,12 +29,37 @@ const Sidebar = ({ setActiveChat }) => {
   const toggleSidebar = () => setIsOpen(!isOpen);
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
-  const createNewChat = () => {
-    if (!isExpanded) setIsExpanded(true); // expand first if collapsed
-    const newChat = { id: Date.now(), title: "New Chat", isArchived: false };
-    setChats([newChat, ...chats]);
-    setActiveChat(newChat);
+  const createNewChat = async () => {
+    try {
+      if (!isExpanded) setIsExpanded(true); // expand first if collapsed
+      const newChat = { id: Date.now(), title: "New Chats", isArchived: false };
+      const Response = await axios.post('http://localhost:3000/api/chat', {
+        title: newChat.title
+      }, {
+        withCredentials: true
+      })
+      setActiveChat(newChat);
+      setChats(prev => [Response.data.chat, ...prev])
+
+      
+    } catch (err) {
+      console.error("Error to creating")
+    }
   };
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/api/chat", {
+          withCredentials: true,
+        });
+        setChats(res.data.chats.reverse() || []);
+      } catch (err) {
+        console.error("Error fetching chats:", err);
+      }
+    };
+    fetchChats();
+  }, []);
 
   const archiveChat = (chatId) => {
     setChats(chats.map(chat => chat.id === chatId ? { ...chat, isArchived: true } : chat));

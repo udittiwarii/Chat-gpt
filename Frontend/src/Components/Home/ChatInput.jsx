@@ -1,23 +1,31 @@
 import { Send } from "lucide-react";
+import socket from "../../Utils/socket";
 
-const ChatInput = ({ input, setInput, setMessages, disabled }) => {
+const ChatInput = ({ input, setInput, setMessages, disabled, activeChat }) => {
   const handleSend = () => {
     if (!input.trim() || disabled) return;
-    
+
     // Add user message
     setMessages((prev) => [...prev, { role: "user", content: input }]);
-    setInput("");
 
+
+
+    socket.emit('ai-message', {
+      chat: activeChat._id,
+      content: input
+    })
+
+    setInput("");
     // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "This is a simulated AI response. Replace with actual API integration."
-        }
-      ]);
-    }, 1000);
+    // setTimeout(() => {
+    // setMessages((prev) => [
+    // ...prev,
+    // {
+    // role: "assistant",
+    // content: "This is a simulated AI response. Replace with actual API integration."
+    // }
+    // ]);
+    // }, 1000);
   };
 
   const handleKeyDown = (e) => {
@@ -46,7 +54,7 @@ const ChatInput = ({ input, setInput, setMessages, disabled }) => {
       <button
         onClick={handleSend}
         disabled={disabled || !input.trim()}
-        className="absolute right-2 bottom-1.5 p-1.5 rounded-lg
+        className="absolute right-2 bottom-3 p-1.5 rounded-lg
           text-[#8e8ea0] hover:text-[#ececf1] disabled:opacity-50
           hover:bg-[#4a4b5c] transition-colors duration-200"
       >
