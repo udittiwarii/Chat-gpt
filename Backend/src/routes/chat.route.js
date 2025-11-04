@@ -14,6 +14,10 @@ router.post('/',
     chatController.createChat
 )
 
+// get --> api/chat
+
+router.get('/', authMiddleware.authUser, chatController.getChat)
+
 
 
 module.exports = router;

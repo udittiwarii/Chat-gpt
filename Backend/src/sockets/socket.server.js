@@ -6,8 +6,13 @@ const aiService = require('../service/ai.service')
 const messageModel = require('../model/message.model')
 const { createMemmory, queryMemmory } = require('../service/Vectordatabase.service')
 
-async function intialsocket(httpserver) {
-    const io = new Server(httpserver, {});// create socket io server
+async function intialsocket(httpserver,) {
+    const io = new Server(httpserver, {
+        cors: {
+            origin: 'http://localhost:5173',
+            credentials: true
+        }
+    });// create socket io server
 
     io.use(async (Socket, next) => {
         const cookies = cookie.parse(Socket.handshake.headers?.cookie || '')
