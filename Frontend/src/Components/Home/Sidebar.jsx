@@ -6,7 +6,7 @@ import SectionTabs from "./SidebarComponents/SectionTabs";
 import ChatList from "./SidebarComponents/ChatList";
 import axios from "axios";
 
-const Sidebar = ({ setActiveChat }) => {
+const Sidebar = ({ setActiveChat , activeChat }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [hovered, setHovered] = useState(false);
@@ -123,6 +123,7 @@ const Sidebar = ({ setActiveChat }) => {
           deleteChat={deleteChat}
           renameChat={renameChat}
           setIsOpen={setIsOpen}
+          activeChat={activeChat}
         />
       </div>
 

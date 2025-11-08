@@ -4,7 +4,10 @@ const jwt = require('jsonwebtoken')
 const userModel = require('../model/user.model')
 const aiService = require('../service/ai.service')
 const messageModel = require('../model/message.model')
-const { createMemmory, queryMemmory } = require('../service/Vectordatabase.service')
+const { createMemmory, queryMemmory } = require('../service/Vectordatabase.service');
+const chatModel = require("../model/chat.model");
+
+const guestChatlimit = 4;
 
 async function intialsocket(httpserver,) {
     const io = new Server(httpserver, {
@@ -18,7 +21,8 @@ async function intialsocket(httpserver,) {
         const cookies = cookie.parse(Socket.handshake.headers?.cookie || '')
 
         if (!cookies.token) {
-            return next(new Error('Authentication error , token not found'))
+            Socket.user = null
+            return next();
         }
 
         try {
@@ -38,7 +42,45 @@ async function intialsocket(httpserver,) {
     })
 
     io.on("connection", (Socket) => {
+        let guestChatCounter = 0;
+        let temporarychat = false;
+        let guestlocalMemory = []
+
+
+        Socket.on('Start-temporary', (data) => {
+            temporarychat = data.temporarychat
+        })
         Socket.on('ai-message', async (messagePayload) => {
+
+
+            if (!Socket.user || temporarychat == true) {
+
+                if (guestChatCounter > guestChatlimit && !temporarychat) {
+                    Socket.emit("ai-response", {
+                        content: "Guest user chat limit exceeded. Please sign up to continue chatting."
+                    })
+                    return;
+                }
+
+                !temporarychat && guestChatCounter++;
+
+                const content = guestlocalMemory.push({
+                    role: 'user',
+                    parts: [{ text: messagePayload.content }]
+                })
+
+                const guestResponse = await aiService.genrateContent(content)
+
+                guestlocalMemory.push({
+                    role: 'model',
+                    parts: [{ text: guestResponse }]
+                })
+
+                Socket.emit('ai-response', guestResponse)
+
+                return;
+            }
+
 
             const [message, vectors] = await Promise.all([
                 await messageModel.create({
@@ -80,6 +122,8 @@ async function intialsocket(httpserver,) {
                 }
             })
 
+            console.log(stm.length)
+
             const ltm = [{
                 role: 'user',
                 parts: [{
@@ -104,6 +148,26 @@ async function intialsocket(httpserver,) {
                 chat: messagePayload.chat
             })
 
+
+            if (stm.length < 2) {
+                const titlePrompt = `
+Generate a short (max 3 words) title for this chat.
+User: ${messagePayload.content}
+AI: ${response}
+Examples: "Greeting", "Coding Help", "Quick Question"
+`;
+                const title = await aiService.genrateTitle(titlePrompt);
+
+                await chatModel.findByIdAndUpdate(messagePayload.chat, {
+                    title: title.trim(),
+                });
+
+                Socket.emit("chat-title-updated", {
+                    chatId: messagePayload.chat,
+                    title: title.trim(),
+                });
+            }
+
             const [aimessge, responsevector] = await Promise.all([
                 await messageModel.create({
                     user: Socket.user._id,
@@ -113,7 +177,6 @@ async function intialsocket(httpserver,) {
                 }),
                 await aiService.vectorGenration(response)
             ])
-
             await createMemmory({
                 vector: responsevector,
                 metadata: {
