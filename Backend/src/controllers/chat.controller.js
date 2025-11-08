@@ -1,4 +1,5 @@
 const chatModel = require('../model/chat.model');
+const messageModel = require('../model/message.model')
 
 async function createChat(req, res) {
     const { title } = req.body;
@@ -47,7 +48,27 @@ async function getChat(req, res) {
     }
 }
 
+
+async function getMessage(req, res) {
+    const { chatId } = req.params
+
+    try {
+        const messages = await messageModel.find({ chat: chatId }).sort({ createdAt: 1 })
+        res.status(200).json({
+            message: "Messages Fetched successfully",
+            messages: messages.map(msg => ({
+                role: msg.role,
+                content: msg.content
+            }))
+        })
+    } catch (err) {
+        res.status(500).json({
+            message: 'Internal server error'
+        })
+    }
+}
 module.exports = {
     createChat,
-    getChat
+    getChat,
+    getMessage
 }

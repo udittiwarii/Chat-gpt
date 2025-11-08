@@ -12,8 +12,9 @@ const chatSchema = new mongoose.Schema({
     }, lastactivity: {
         type: Date,
         default: Date.now
+    }, isArchived: {
+        type: Boolean, default: false
     }
-
 },
     {
         timestamps: true

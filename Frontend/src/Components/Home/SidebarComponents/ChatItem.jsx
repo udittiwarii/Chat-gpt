@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {  FiMoreHorizontal } from "react-icons/fi";
+import { FiMoreHorizontal } from "react-icons/fi";
 
 const ChatItem = ({
   chat,
@@ -9,6 +9,7 @@ const ChatItem = ({
   deleteChat,
   renameChat,
   setIsOpen,
+  isActive,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -33,9 +34,14 @@ const ChatItem = ({
   return (
     <div
       className={`group relative flex items-center justify-between p-3 rounded-lg cursor-pointer 
-        hover:bg-[#2a2b32] transition-colors duration-200 ${
-          !isExpanded ? "justify-center" : ""
-        }`}
+        transition-colors duration-200
+        ${
+          isActive
+            ? "bg-[#343541]" // ✅ Active chat background (like ChatGPT)
+            : "hover:bg-[#2a2b32]" // hover for inactive chats
+        }
+        ${!isExpanded ? "justify-center" : ""}
+      `}
       onClick={() => {
         setActiveChat(chat);
         setIsOpen(false);
@@ -43,7 +49,15 @@ const ChatItem = ({
     >
       {/* 🧠 Chat Icon + Title */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        {isExpanded && <span className="truncate text-[#ececf1]">{chat.title}</span>}
+        {isExpanded && (
+          <span
+            className={`truncate text-[#ececf1] ${
+              isActive ? "font-semibold text-white" : ""
+            }`}
+          >
+            {chat.title}
+          </span>
+        )}
       </div>
 
       {/* ... Menu Button */}

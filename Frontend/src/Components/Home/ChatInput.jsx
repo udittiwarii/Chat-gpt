@@ -1,35 +1,37 @@
 import { Send } from "lucide-react";
 import socket from "../../Utils/socket";
 
-const ChatInput = ({ input, setInput, setMessages, disabled, activeChat }) => {
+const ChatInput = ({ input, setInput, setMessages, disabled, activeChat, iscentere, tempMode }) => {
   const handleSend = () => {
     if (!input.trim() || disabled) return;
 
     // Add user message
     setMessages((prev) => [...prev, { role: "user", content: input }]);
 
-
-
-    socket.emit('ai-message', {
-      chat: activeChat._id,
-      content: input
-    })
+    if (tempMode) {
+      // 🟡 Guest / Temp Mode: simulate AI message locally
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "This is a temporary AI response (local mode).",
+          },
+        ]);
+      }, 1000);
+    } else {
+      // 🟢 Normal user: use socket
+      socket.emit("ai-message", {
+        chat: activeChat._id,
+        content: input,
+      });
+    }
 
     setInput("");
-    // Simulate AI response (replace with actual API call)
-    // setTimeout(() => {
-    // setMessages((prev) => [
-    // ...prev,
-    // {
-    // role: "assistant",
-    // content: "This is a simulated AI response. Replace with actual API integration."
-    // }
-    // ]);
-    // }, 1000);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -39,7 +41,9 @@ const ChatInput = ({ input, setInput, setMessages, disabled, activeChat }) => {
     <div className="relative">
       <textarea
         rows={1}
-        placeholder={disabled ? "Select a chat to start messaging..." : "Send a message..."}
+        placeholder={
+          disabled ? "Select a chat to start messaging..." : "Send a message..."
+        }
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}

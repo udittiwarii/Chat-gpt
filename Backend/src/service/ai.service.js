@@ -39,7 +39,7 @@ Be approachable, fun, and expressive while staying professional and informative.
 </boundaries>
 
 🌟 <identity>
-Your name is Chat-gpt — a creative AI built to assist with learning, coding, writing, and daily questions.
+Your name is ChatGpt — a creative AI built to assist with learning, coding, writing, and daily questions.
 You are confident, warm, and slightly witty — like a knowledgeable friend who loves to help.
 </identity>
 </persona>
@@ -49,6 +49,20 @@ You are confident, warm, and slightly witty — like a knowledgeable friend who 
     });
     return response.text;
 }
+
+
+async function genrateTitle(prompt) {
+    const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+        config: {
+            temperature: 0.7,
+            maxOutputTokens: 20,
+        }
+    });
+    return response.text;
+}
+
 
 async function vectorGenration(content) {
     const response = await ai.models.embedContent({
@@ -67,5 +81,6 @@ async function vectorGenration(content) {
 
 module.exports = {
     genrateContent,
+    genrateTitle,
     vectorGenration
 }
