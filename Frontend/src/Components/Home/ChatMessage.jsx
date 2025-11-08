@@ -1,7 +1,3 @@
-import React, { useEffect } from "react";
-import { SiOpenai } from "react-icons/si";
-import { FaUser } from "react-icons/fa";
-import axios from "axios";
 
 const ChatMessage = ({ message }) => {
   const isUser = message.role === "user";

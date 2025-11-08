@@ -1,28 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ChatScreen from "../Components/Home/ChatScreen";
 import Sidebar from "../Components/Home/Sidebar";
 
 const Home = () => {
-  const [user, setUser] = useState(null); // get from auth context or JWT
+  const [user, setUser] = useState(null); // set this from JWT/auth later
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [tempMode, setTempMode] = useState(false); // temporary chat toggle
-  const [messageCount, setMessageCount] = useState(0); // for guest limit
+  const [tempMode, setTempMode] = useState(!user); // guest mode if no user
+  const [messageCount, setMessageCount] = useState(0);
 
-  // When a new chat is selected, clear the messages
   const handleChatChange = (chat) => {
     setActiveChat(chat);
-    setMessages([]); // In a real app, you'd load messages for this chat
+    setMessages([]);
     setInput("");
   };
 
   return (
     <div className="flex h-screen w-screen bg-[#343541] overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar setActiveChat={handleChatChange} activeChat={activeChat} />
+      <Sidebar
+        setActiveChat={handleChatChange}
+        activeChat={activeChat}
+        tempMode={tempMode}
+      />
 
-      {/* Chat Area */}
       <main className="flex-1 relative flex flex-col h-full">
         <ChatScreen
           activeChat={activeChat}
@@ -30,6 +31,9 @@ const Home = () => {
           setMessages={setMessages}
           input={input}
           setInput={setInput}
+          tempMode={tempMode}
+          setMessageCount={setMessageCount}
+          setTempMode={setTempMode}
         />
       </main>
     </div>

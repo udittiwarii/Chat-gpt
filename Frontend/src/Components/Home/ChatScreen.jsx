@@ -4,7 +4,7 @@ import ChatInput from "./ChatInput";
 import socket from "../../Utils/socket";
 import axios from "axios";
 
-const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
+const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMode, setTempMode }) => {
   const messagesEndRef = useRef(null);
 
   // Auto-scroll to bottom when new message arrives
@@ -36,6 +36,14 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
     return () => socket.off("ai-response", handleAIresponse);
   }, [activeChat?._id, setMessages]);
 
+
+  socket.on("chat-title-updated", ({ chatId, title }) => {
+    console.log("Chat title updated:", title);
+    // optional UI update for title if you display it
+  });
+
+
+
   // 🔹 Fetch chat messages when chat changes
   useEffect(() => {
     if (!activeChat?._id) return;
@@ -59,6 +67,24 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
     fetchChatMessages();
   }, [activeChat?._id]);
 
+
+
+  useEffect(() => {
+    if (!activeChat?._id || tempMode) return; // skip API for temp
+    const fetchChatMessages = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/chat/message/${activeChat._id}`,
+          { withCredentials: true }
+        );
+        setMessages(response.data.messages);
+      } catch (error) {
+        console.error("Error fetching chat messages:", error);
+      }
+    };
+    fetchChatMessages();
+  }, [activeChat?._id, tempMode]);
+
   return (
     <div className="flex flex-col w-full h-full bg-[#1E1F23] text-[#ECECF1]">
       {/* ✅ Navbar */}
@@ -78,7 +104,21 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
           </h1>
         </div>
         <div className="hidden sm:flex gap-6 text-sm pr-4">
-          <button className="font-semibold text-lg md:text-xl">Share</button>
+          {messages.length === 0 ? <span className="text-[#9C9CA3]"
+          onClick={()=>{
+            setTempMode(true);
+          }}> <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-6 h-6 text-gray-300 "
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" strokeDasharray="4 4" />
+          </svg></span> : <button className="font-semibold text-lg md:text-xl">Share</button>}
         </div>
       </nav>
 
@@ -138,7 +178,9 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput }) => {
               setMessages={setMessages}
               disabled={!activeChat}
               activeChat={activeChat}
+              tempMode={tempMode}
             />
+
           </div>
         </div>
       )}
