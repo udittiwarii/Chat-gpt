@@ -6,15 +6,15 @@ import SectionTabs from "./SidebarComponents/SectionTabs";
 import ChatList from "./SidebarComponents/ChatList";
 import axios from "axios";
 import socket from "../../Utils/socket";
+import serverApi from "../../Utils/serverapi";
 
-const Sidebar = ({ setActiveChat, activeChat, tempMode }) => {
+const Sidebar = ({ setActiveChat, activeChat, tempMode, chats, setChats, setTempMode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true)
   const [hovered, setHovered] = useState(false);
   const [showHoverIcon, setShowHoverIcon] = useState(false);
   const [activeSection, setActiveSection] = useState("chats");
 
-  const [chats, setChats] = useState([]);
 
   useEffect(() => {
     let timer;
@@ -30,39 +30,18 @@ const Sidebar = ({ setActiveChat, activeChat, tempMode }) => {
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
 
-  const createNewChat = async () => {
-    try {
-      if (!isExpanded) setIsExpanded(true);
+  const createNewChat = () => {
+    const tempChat = {
+      _id: `temp-${Date.now()}`,
+      title: "New Chat",
+      messages: [],
+      isArchived: false,
+      isTemp: true,
+    };
 
-      const newChat = {
-        _id: Date.now().toString(), // unique ID for local chat
-        title: "New Chat",
-        isArchived: false,
-        messages: [],
-        isTemp: tempMode, // mark for clarity
-      };
-
-      if (tempMode) {
-        // 🟡 Guest Mode → local only
-        setChats((prev) => [newChat, ...prev]);
-        setActiveChat(newChat);
-        // Optional: persist in localStorage
-        localStorage.setItem("tempChats", JSON.stringify([newChat, ...chats]));
-        return;
-      }
-
-      // 🟢 Logged-in user → backend call
-      const response = await axios.post(
-        "http://localhost:3000/api/chat",
-        { title: newChat.title },
-        { withCredentials: true }
-      );
-
-      setActiveChat(response.data.chat);
-      setChats((prev) => [response.data.chat, ...prev]);
-    } catch (err) {
-      console.error("Error creating chat:", err);
-    }
+    // Don’t add to sidebar yet — only open it
+    setActiveChat(tempChat);
+    setTempMode(false)
   };
 
   useEffect(() => {
@@ -96,19 +75,12 @@ const Sidebar = ({ setActiveChat, activeChat, tempMode }) => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        if (tempMode) {
-          // 🟡 Load local guest chats
-          const stored = JSON.parse(localStorage.getItem("tempChats") || "[]");
-          setChats(stored);
-          return;
-        }
 
         // 🟢 Fetch from backend for logged-in users 
-        const res = await axios.get("http://localhost:3000/api/chat", {
+        const res = await serverApi.get("http://localhost:3000/api/chat", {
           withCredentials: true,
         });
         setChats(res.data.chats.reverse() || []);
-        console.log("Fetched chats:", res.data.chats);
       } catch (err) {
         console.error("Error fetching chats:", err);
       }
@@ -133,19 +105,17 @@ const Sidebar = ({ setActiveChat, activeChat, tempMode }) => {
     }
   };
 
-  const deleteChat = (chatId) => {
-    const updated = chats.filter((chat) => chat._id !== chatId);
-    setChats(updated);
-
+  const deleteChat = async (chatId) => {
+    await serverApi.delete(`/chat/${chatId}`);
+    setChats((prev) => prev.filter((chat) => chat._id !== chatId));
     if (tempMode) {
       localStorage.setItem("tempChats", JSON.stringify(updated));
     }
   };
 
 
-  const filteredChats = chats.filter(chat =>
-    activeSection === "chats" ? !chat.isArchived : chat.isArchived
-  );
+  const filteredChats = chats.filter(chat => !chat.isTemp && !chat.isArchived);
+
 
   const renameChat = (chatId, newTitle) => {
     setChats(chats.map(chat =>
@@ -200,7 +170,6 @@ const Sidebar = ({ setActiveChat, activeChat, tempMode }) => {
         />
       </div>
 
-      {/* Mobile Overlay */}
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-30" onClick={toggleSidebar} />
       )}

@@ -24,8 +24,6 @@ async function createChat(req, res) {
     }
 }
 
-
-
 async function getChat(req, res) {
     const user = req.user
 
@@ -48,7 +46,6 @@ async function getChat(req, res) {
     }
 }
 
-
 async function getMessage(req, res) {
     const { chatId } = req.params
 
@@ -67,8 +64,54 @@ async function getMessage(req, res) {
         })
     }
 }
+
+async function deleteChat(req, res) {
+    const { chatId } = req.params
+
+    if (!chatId) {
+        res.status(500).json({
+            message: 'chat id is not found'
+        })
+    }
+
+
+    try {
+
+        await chatModel.findOneAndDelete({ _id: chatId })
+        await messageModel.deleteMany({ chat: chatId })
+
+        res.status(200).json({
+            messge: "deleted successfully"
+        })
+
+    } catch (err) {
+        res.status.json({
+            messge: 'internal server error'
+        })
+    }
+}
+
+const Updatetitle = async (req, res) => {
+    const { chatId } = req.params
+    const { title } = req.body
+    try {
+        const chat = await chatModel.findById(chatId)
+        if (!chat) {
+            return res.status(404).json({ message: 'Chat not found' });
+        }
+        chat.title = title || chat.title;
+        await chat.save();
+        res.status(200).json({ message: 'Chat title updated successfully', chat });
+    } catch (err) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
+
+}
+
 module.exports = {
     createChat,
     getChat,
-    getMessage
-}
+    getMessage,
+    deleteChat,
+    Updatetitle
+}                                   

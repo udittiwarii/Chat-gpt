@@ -1,12 +1,16 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import './../style/Login.css'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../Context/UserContext';
+
 
 const Login = () => {
   const [from, setfrom] = useState({ email: '', password: '' })
   const [submit, setsubmit] = useState(false)
   const navigate = useNavigate()
+  const { setUser } = useUser();
+
 
 
   const handleChange = (e) => {
@@ -23,11 +27,11 @@ const Login = () => {
       withCredentials: true
     }
     ).then((res) => {
-      console.log("res: ", res)
+      setUser(res.data.user);
       navigate('/')
 
     }).catch((err) => {
-      console.log(err)
+      console.error("Login error:", err);
     }).finally(() => {
       setsubmit(false)
     })

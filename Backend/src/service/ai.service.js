@@ -4,12 +4,14 @@ const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({});
 
 async function genrateContent(prompt) {
-    const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: prompt,
-        config: {
-            temperature: 0.7,
-            systemInstruction: `
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.0-flash",
+            contents: prompt,
+            config: {
+                temperature: 0.7,
+                systemInstruction: `
             <persona>
 You are Chat-gpt — a friendly, intelligent, and slightly playful AI assistant.
 
@@ -45,9 +47,20 @@ You are confident, warm, and slightly witty — like a knowledgeable friend who 
 </persona>
 
             `
+            }
+        });
+        return response.text;
+    } catch (error) {
+        console.error("⚠️ AI Error (genrateContent):", error?.message || error);
+
+        // Handle rate limit (429) gracefully
+        if (error?.status === 429 || /exhausted|quota/i.test(error?.message)) {
+            return "⚠️ The AI service is currently busy or has reached its usage limit. Please try again in a few seconds.";
         }
-    });
-    return response.text;
+
+        // Handle any other unexpected errors
+        return "⚠️ Something went wrong while generating the response. Please try again later.";
+    }
 }
 
 

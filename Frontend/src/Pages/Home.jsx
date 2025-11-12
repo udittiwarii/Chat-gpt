@@ -7,8 +7,10 @@ const Home = () => {
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const [tempMode, setTempMode] = useState(!user); // guest mode if no user
+  const [tempMode, setTempMode] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
+  const [chats, setChats] = useState([]);
+
 
   const handleChatChange = (chat) => {
     setActiveChat(chat);
@@ -22,10 +24,14 @@ const Home = () => {
         setActiveChat={handleChatChange}
         activeChat={activeChat}
         tempMode={tempMode}
+        chats={chats}
+        setChats={setChats}
+        setTempMode={setTempMode}
       />
 
       <main className="flex-1 relative flex flex-col h-full">
         <ChatScreen
+          setActiveChat={setActiveChat}
           activeChat={activeChat}
           messages={messages}
           setMessages={setMessages}
@@ -34,6 +40,7 @@ const Home = () => {
           tempMode={tempMode}
           setMessageCount={setMessageCount}
           setTempMode={setTempMode}
+          setChats={setChats}
         />
       </main>
     </div>

@@ -7,9 +7,12 @@ const authController = require('../controllers/auth.controller')
 
 const router = express.Router();
 
-
+// register user
 router.post('/register', authController.registerUser)
-router.post('/login', authController.loginUser)
+router.post('/login', authController.loginUser)// login user
+router.post('/logout', authController.logoutUser) // logout user
 
+// get my profile
+router.post('/me', authController.getMyProfile)
 
 module.exports = router;

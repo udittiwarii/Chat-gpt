@@ -4,7 +4,7 @@ import ChatInput from "./ChatInput";
 import socket from "../../Utils/socket";
 import axios from "axios";
 
-const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMode, setTempMode }) => {
+const ChatScreen = ({ activeChat, setActiveChat, messages, setMessages, input, setInput, tempMode, setTempMode, setChats }) => {
   const messagesEndRef = useRef(null);
 
   // Auto-scroll to bottom when new message arrives
@@ -19,23 +19,31 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMo
   // 🔹 Handle AI responses coming through socket
   useEffect(() => {
     const handleAIresponse = (data) => {
-      if (!activeChat?._id) return;
-      if (data.chat === activeChat._id) {
+      if (data.chat === activeChat?._id) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.content },
+        ]);
+      } else if (tempMode) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.content },
+        ]);
+      } else if (!user || user.isGuest) {
         setMessages((prev) => [
           ...prev,
           { role: "assistant", content: data.content },
         ]);
       }
-
-      if (process.env.NODE_ENV === "development") {
-        console.log("AI response received:", data);
-      }
     };
 
-    socket.on("ai-response", handleAIresponse);
-    return () => socket.off("ai-response", handleAIresponse);
-  }, [activeChat?._id, setMessages]);
+    const response = socket.on("ai-response", handleAIresponse);
+    console.log(response.content)
 
+    return () => {
+      socket.off("ai-response", handleAIresponse);
+    };
+  }, [activeChat?._id, setMessages]);
 
   socket.on("chat-title-updated", ({ chatId, title }) => {
     console.log("Chat title updated:", title);
@@ -44,46 +52,25 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMo
 
 
 
-  // 🔹 Fetch chat messages when chat changes
+  // 🔹 Fetch chat messages when chat change
+
   useEffect(() => {
     if (!activeChat?._id) return;
 
     const fetchChatMessages = async () => {
       try {
-        // Clear old messages first
-        setMessages([]);
-
-        const response = await axios.get(
-          `http://localhost:3000/api/chat/message/${activeChat._id}`,
-          { withCredentials: true }
-        );
-
-        setMessages(response.data.messages)
-      } catch (error) {
-        console.error("Error fetching chat messages:", error);
-      }
-    };
-
-    fetchChatMessages();
-  }, [activeChat?._id]);
-
-
-
-  useEffect(() => {
-    if (!activeChat?._id || tempMode) return; // skip API for temp
-    const fetchChatMessages = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/api/chat/message/${activeChat._id}`,
-          { withCredentials: true }
-        );
+        const response = await axios.get(`http://localhost:3000/api/chat/message/${activeChat._id}`, {
+          withCredentials: true,
+        });
         setMessages(response.data.messages);
       } catch (error) {
         console.error("Error fetching chat messages:", error);
       }
     };
+
     fetchChatMessages();
   }, [activeChat?._id, tempMode]);
+  console.log(messages)
 
   return (
     <div className="flex flex-col w-full h-full bg-[#1E1F23] text-[#ECECF1]">
@@ -104,21 +91,21 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMo
           </h1>
         </div>
         <div className="hidden sm:flex gap-6 text-sm pr-4">
-          {messages.length === 0 ? <span className="text-[#9C9CA3]"
-          onClick={()=>{
-            setTempMode(true);
-          }}> <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            className="w-6 h-6 text-gray-300 "
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" strokeDasharray="4 4" />
-          </svg></span> : <button className="font-semibold text-lg md:text-xl">Share</button>}
+          {messages?.length === 0 ? <span className="text-[#9C9CA3]"
+            onClick={() => {
+              setTempMode(true);
+            }}> <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="w-6 h-6 text-gray-300 "
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" strokeDasharray="4 4" />
+            </svg></span> : <button className="font-semibold text-lg md:text-xl">Share</button>}
         </div>
       </nav>
 
@@ -131,7 +118,7 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMo
               Start a new chat to begin your conversation with AI
             </p>
           </div>
-        ) : messages.length === 0 ? (
+        ) : messages?.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4">
             <h2 className="text-2xl font-semibold mb-2 text-[#ECECF1]">
               {activeChat.title}
@@ -141,20 +128,22 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMo
             </p>
 
             {/* ✅ Centered Input */}
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-2xl transition-opacity duration-500">
               <ChatInput
                 input={input}
                 setInput={setInput}
                 setMessages={setMessages}
                 disabled={!activeChat}
                 activeChat={activeChat}
-                isCenter={true}
+                tempMode={tempMode}
+                setActiveChat={setActiveChat}
+                setChats={setChats}
               />
             </div>
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto w-full py-4 px-2 sm:px-4">
-            {messages.map((msg, i) => (
+          <div className="max-w-3xl mx-auto w-full py-4 px-2 sm:px-4 transition-opacity duration-500">
+            {messages?.map((msg, i) => (
               <ChatMessage
                 key={i}
                 message={msg}
@@ -169,7 +158,7 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMo
 
 
       {/* ✅ Input Area */}
-      {messages.length > 0 && (
+      {messages?.length > 0 && (
         <div className="border-t border-[#3A3B3F] bg-[#2C2D31] sm:bg-transparent">
           <div className="max-w-3xl mx-auto w-full px-4 py-4">
             <ChatInput
@@ -179,8 +168,10 @@ const ChatScreen = ({ activeChat, messages, setMessages, input, setInput, tempMo
               disabled={!activeChat}
               activeChat={activeChat}
               tempMode={tempMode}
+              setActiveChat={setActiveChat}
+              setChats={setChats}
+              messages={messages}
             />
-
           </div>
         </div>
       )}
