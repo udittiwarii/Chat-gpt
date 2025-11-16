@@ -36,7 +36,8 @@ async function getChat(req, res) {
                 _id: chat._id,
                 title: chat.title,
                 userlastactivity: chat.lastactivity,
-                Chatuser: chat.user
+                Chatuser: chat.user,
+                isArchived: chat.isArchived
             }))
         })
     } catch (err) {
@@ -108,10 +109,27 @@ const Updatetitle = async (req, res) => {
 
 }
 
+const Archivechat = async (req, res) => {
+    const { chatId } = req.params
+
+    try {
+        const chat = await chatModel.findById(chatId)
+        if (!chat) {
+            return res.status(404).json({ message: 'Chat not found' });
+        }
+        chat.isArchived = !chat.isArchived
+        await chat.save()
+        res.status(200).json({ message: chat.isArchived ? "is Archiveed successfully " : "is unarchived successfully", chat })
+    } catch (err) {
+        res.status(500).json({ message: 'Internal server error' })
+    }
+}
+
 module.exports = {
     createChat,
     getChat,
     getMessage,
     deleteChat,
-    Updatetitle
-}                                   
+    Updatetitle,
+    Archivechat
+}

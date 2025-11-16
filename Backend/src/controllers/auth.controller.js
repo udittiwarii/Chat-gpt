@@ -96,11 +96,16 @@ async function loginUser(req, res) {
 
 async function logoutUser(req, res) {
     try {
-        res.clerarCookie('token')
+
+        res.clearCookie("token", {
+            secure: false, // production me true
+            sameSite: "lax"
+        });
         return res.status(200).json({
             message: "User logged out successfully"
         })
     } catch (err) {
+
         return res.status(500).json({
             message: "Error logging out user"
         })
@@ -113,7 +118,7 @@ async function getMyProfile(req, res) {
         const user = await userModel.findById(userId);
         if (!user) {
             return res.status(404).json({
-                message: "User not found"
+                message: "Please login to get profile"
             })
         }
         return res.status(200).json({
@@ -132,5 +137,7 @@ async function getMyProfile(req, res) {
 
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser,
+    getMyProfile
 }

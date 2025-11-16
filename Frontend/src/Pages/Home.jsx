@@ -3,7 +3,6 @@ import ChatScreen from "../Components/Home/ChatScreen";
 import Sidebar from "../Components/Home/Sidebar";
 
 const Home = () => {
-  const [user, setUser] = useState(null); // set this from JWT/auth later
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
