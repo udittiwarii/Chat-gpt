@@ -14,7 +14,18 @@ const ChatItem = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // ✅ Close menu when clicking outside
+  const [isEditing, setIsEditing] = useState(false);
+  const [newTitle, setNewTitle] = useState(chat.title);
+  const inputRef = useRef(null);
+
+  // Auto focus when editing starts
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -25,43 +36,70 @@ const ChatItem = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Inline rename submit function
+  const handleRenameSubmit = () => {
+    if (newTitle.trim() !== "" && newTitle !== chat.title) {
+      renameChat(chat._id, newTitle.trim());
+      console.log("ChatItem Rendered", chat.title);
+
+    }
+    setIsEditing(false);
+  };
+
   const handleRename = () => {
-    const newTitle = prompt("Rename chat:", chat.title);
-    if (newTitle && newTitle.trim() !== "") renameChat(chat.id, newTitle.trim());
     setMenuOpen(false);
+    setIsEditing(true);
   };
 
   return (
     <div
       className={`group relative flex items-center justify-between p-3 rounded-lg cursor-pointer 
         transition-colors duration-200
-        ${
-          isActive
-            ? "bg-[#343541]" // ✅ Active chat background (like ChatGPT)
-            : "hover:bg-[#2a2b32]" // hover for inactive chats
-        }
+        ${isActive ? "bg-[#343541]" : "hover:bg-[#2a2b32]"}
         ${!isExpanded ? "justify-center" : ""}
       `}
-      onClick={() => {
+      onClick={(e) => {
+        if (isEditing) {
+          e.stopPropagation(); // STOP parent click
+          return;
+        }
         setActiveChat(chat);
         setIsOpen(false);
       }}
     >
-      {/* 🧠 Chat Icon + Title */}
+      {/* LEFT SIDE */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
+
         {isExpanded && (
-          <span
-            className={`truncate text-[#ececf1] ${
-              isActive ? "font-semibold text-white" : ""
-            }`}
-          >
-            {chat.title}
-          </span>
+          <>
+            {!isEditing ? (
+              <span
+                className={`truncate text-[#ececf1] ${isActive ? "font-semibold text-white" : ""
+                  }`}
+              >
+                {chat.title}
+              </span>
+            ) : (
+              <input
+                ref={inputRef}
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onClick={(e) => e.stopPropagation()} // ⬅️ IMPORTANT FIX
+                onBlur={handleRenameSubmit}
+                onKeyDown={(e) => {
+                  e.stopPropagation(); // ⬅️ Prevent parent click
+                  if (e.key === "Enter") handleRenameSubmit();
+                }}
+                className="w-full bg-transparent border border-[#52525f] px-2 py-1 rounded text-[#ececf1] outline-none"
+              />
+
+            )}
+          </>
         )}
       </div>
 
-      {/* ... Menu Button */}
-      {isExpanded && (
+      {/* RIGHT MENU BUTTON */}
+      {isExpanded && !isEditing && (
         <div className="relative flex items-center">
           <button
             onClick={(e) => {
@@ -73,7 +111,7 @@ const ChatItem = ({
             <FiMoreHorizontal className="text-[#8e8ea0] hover:text-[#acacbe]" />
           </button>
 
-          {/* Dropdown Menu */}
+          {/* DROPDOWN */}
           {menuOpen && (
             <div
               ref={menuRef}
@@ -86,18 +124,20 @@ const ChatItem = ({
               >
                 Rename
               </button>
+
               <button
                 onClick={() => {
-                  archiveChat(chat.id);
+                  archiveChat(chat._id);
                   setMenuOpen(false);
                 }}
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-[#343541] text-[#ececf1]"
               >
                 {chat.isArchived ? "Unarchive" : "Archive"}
               </button>
+
               <button
                 onClick={() => {
-                  deleteChat(chat.id);
+                  deleteChat(chat._id);
                   setMenuOpen(false);
                 }}
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-[#343541] text-red-400"

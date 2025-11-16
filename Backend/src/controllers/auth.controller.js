@@ -94,8 +94,50 @@ async function loginUser(req, res) {
 
 }
 
+async function logoutUser(req, res) {
+    try {
+
+        res.clearCookie("token", {
+            secure: false, // production me true
+            sameSite: "lax"
+        });
+        return res.status(200).json({
+            message: "User logged out successfully"
+        })
+    } catch (err) {
+
+        return res.status(500).json({
+            message: "Error logging out user"
+        })
+    }
+}
+
+async function getMyProfile(req, res) {
+    try {
+        const userId = req.user.id;
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "Please login to get profile"
+            })
+        }
+        return res.status(200).json({
+            user: {
+                id: user._id,
+                email: user.email,
+                fullname: user.fullname
+            }
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: "Error fetching user profile"
+        })
+    }
+}
 
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser,
+    getMyProfile
 }

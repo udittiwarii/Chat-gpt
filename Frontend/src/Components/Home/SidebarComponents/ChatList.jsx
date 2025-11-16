@@ -9,22 +9,34 @@ const ChatList = ({
   archiveChat,
   deleteChat,
   setIsOpen,
-  activeChat
+  activeChat,
+  renameChat
 }) => (
-  <div className="flex-1 overflow-y-auto px-2 pb-4 scrollbar-thin scrollbar-thumb-gray-700">
-    {chats.map((chat) => (
-      <ChatItem
-        key={chat._id}
-        chat={chat}
-        isExpanded={isExpanded}
-        activeSection={activeSection}
-        setActiveChat={setActiveChat}
-        archiveChat={archiveChat}
-        deleteChat={deleteChat}
-        setIsOpen={setIsOpen}
-        isActive={activeChat && activeChat._id === chat._id}
-      />
-    ))}
+  <div
+    className="flex-1 px-2 pb-4 overflow-y-auto 
+               scrollbar-thin scrollbar-thumb-gray-700 hover:scrollbar-thumb-gray-600 
+               scrollbar-track-transparent scroll-smooth"
+  >
+    {chats.length > 0 ? (
+      chats.map((chat) => (
+        <ChatItem
+          key={chat._id}
+          chat={chat}
+          isExpanded={isExpanded}
+          activeSection={activeSection}
+          setActiveChat={setActiveChat}
+          archiveChat={archiveChat}
+          deleteChat={deleteChat}
+          setIsOpen={setIsOpen}
+          renameChat={renameChat}
+          isActive={activeChat && activeChat._id === chat._id}
+        />
+      ))
+    ) : (
+      <p className="text-gray-400 text-center mt-4 text-sm">
+        No chats available
+      </p>
+    )}
   </div>
 );
 

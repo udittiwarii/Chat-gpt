@@ -2,10 +2,14 @@ import '../style/Register.css'
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../Context/UserContext';
+
 
 const Register = () => {
   const [form, setForm] = useState({ email: '', firstname: '', lastname: '', password: '' });
   const navigate = useNavigate();
+  const { setUser } = useUser();
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,10 +32,9 @@ const Register = () => {
       },
       { withCredentials: true }
     ).then((res) => {
-
-      console.log("✅ Registered successfully:", res.data);
+      setUser(res.data.user)
       navigate('/'); // redirect to login page after registration
-    }).catch((err)=> {
+    }).catch((err) => {
       console.error("❌ Error during registration:", err.response?.data || err.message);
     })
   };

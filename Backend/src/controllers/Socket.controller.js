@@ -8,14 +8,12 @@ const { createMemmory, queryMemmory } = require('../service/Vectordatabase.servi
 async function handleTemporaryChat(socket, messagePayload, tempChatMemory) {
     tempChatMemory.push({ role: 'user', parts: [{ text: messagePayload.content }] });
 
-    const response = await aiService.genrateContent(tempChatMemory)
-
+    const response = await aiService.genrateTempContent(tempChatMemory)
 
     socket.emit('ai-response', { content: response });
 
 
     tempChatMemory.push({ role: 'model', parts: [{ text: response }] });
-
 }
 
 
@@ -27,22 +25,33 @@ async function handleGuestChat(Socket, messagePayload, guestlocalMemory, guestCh
         return;
     }
 
+
+
     guestlocalMemory.push({
         role: 'user',
-        parts: [{ text: messagePayload.content }]
-    })
+        parts: [{
+            text: `
+Guest message #${guestChatCounter + 1} (limit ${guestChatlimit}):
+
+${messagePayload.content}
+
+NOTE: This user is not logged in. AI must remind them politely that guest mode has limited messages.
+`
+        }]
+    });
 
 
     const guestResponse = await aiService.genrateContent(guestlocalMemory)
 
 
-    Socket.emit('ai-response', guestResponse)
+    Socket.emit('ai-response', { content: guestResponse })
 
 
     guestlocalMemory.push({
         role: 'model',
         parts: [{ text: guestResponse }]
     })
+
 
 
 }
