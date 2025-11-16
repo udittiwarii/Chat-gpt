@@ -77,7 +77,7 @@ const Sidebar = ({ setActiveChat, activeChat, tempMode, chats, setChats, setTemp
 
 
   const renameChat = async (chatId, newTitle) => {
-    await axios.put(`http://localhost:3000/api/chat/title/${chatId}`, {
+    await axios.put(`https://chatgpt-qpm4.onrender.com/api/chat/title/${chatId}`, {
       title: newTitle
     }, {
       withCredentials: true
@@ -88,7 +88,7 @@ const Sidebar = ({ setActiveChat, activeChat, tempMode, chats, setChats, setTemp
   };
 
   const archiveChat = async (chatId) => {
-    const res = await axios.put(`http://localhost:3000/api/chat/archive/${chatId}`, {
+    const res = await axios.put(`https://chatgpt-qpm4.onrender.com/api/chat/archive/${chatId}`, {
       withCredentials: true
     })
     console.log(res)
@@ -98,7 +98,7 @@ const Sidebar = ({ setActiveChat, activeChat, tempMode, chats, setChats, setTemp
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/chat", { withCredentials: true });
+        const res = await axios.get("https://chatgpt-qpm4.onrender.com/api/chat", { withCredentials: true });
         // Sort descending by lastactivity (most recent first)
         const sortedChats = res.data.chats?.sort((a, b) => new Date(b.userlastactivity) - new Date(a.userlastactivity));
         setChats(sortedChats || []);
@@ -120,7 +120,7 @@ const Sidebar = ({ setActiveChat, activeChat, tempMode, chats, setChats, setTemp
   }, [chats, activeSection]);
 
   const deleteChat = async (chatId) => {
-    await axios.delete(`http://localhost:3000/api/chat/${chatId}`, {
+    await axios.delete(`https://chatgpt-qpm4.onrender.com/api/chat/${chatId}`, {
       withCredentials: true,
     }).catch((err) => {
       console.error("❌ Error deleting chat:", err);

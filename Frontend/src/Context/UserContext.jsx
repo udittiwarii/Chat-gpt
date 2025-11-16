@@ -13,7 +13,7 @@ export const UserProvider = ({ children }) => {
         const fetchUser = async () => {
             try {
                 // Backend should verify the token stored in cookies
-                const res = await axios.get("http://localhost:3000/api/auth/me", {
+                const res = await axios.get("https://chatgpt-qpm4.onrender.com/api/auth/me", {
                     withCredentials: true,
                 });
                 setUser(res.data.user);

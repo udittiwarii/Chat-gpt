@@ -66,7 +66,7 @@ const ChatScreen = ({ activeChat, setActiveChat, messages, setMessages, input, s
 
     const fetchChatMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/chat/message/${activeChat._id}`, {
+        const response = await axios.get(`https://chatgpt-qpm4.onrender.com/api/chat/message/${activeChat._id}`, {
           withCredentials: true,
         });
         setMessages(response.data.messages);
