@@ -51,7 +51,7 @@ const ChatInput = ({
         // If chat not yet created in backend (first message)
         if (!chatId || chatId.startsWith("temp")) {
           const res = await axios.post(
-            "http://localhost:3000/api/chat",
+            "https://chatgpt-qpm4.onrender.com/api/chat",
             { title: "New Chat" },
             { withCredentials: true }
           );

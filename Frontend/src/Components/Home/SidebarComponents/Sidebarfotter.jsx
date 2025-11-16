@@ -12,7 +12,7 @@ const SidebarFooter = () => {
     const handleLogout = async () => {
         try {
             await axios.post(
-                "http://localhost:3000/api/auth/logout",
+                "https://chatgpt-qpm4.onrender.com/api/auth/logout",
                 {},
                 { withCredentials: true }
             );

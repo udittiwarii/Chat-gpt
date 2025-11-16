@@ -21,7 +21,7 @@ const Register = () => {
 
 
     const res = await axios.post(
-      'http://localhost:3000/api/auth/register',
+      'https://chatgpt-qpm4.onrender.com/api/auth/register',
       {
         email: form.email,
         fullname: {

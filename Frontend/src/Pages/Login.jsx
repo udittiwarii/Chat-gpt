@@ -21,7 +21,7 @@ const Login = () => {
   const handlesubmit = (e) => {
     e.preventDefault()
     setsubmit(true)
-    axios.post("http://localhost:3000/api/auth/login", {
+    axios.post("https://chatgpt-qpm4.onrender.com/api/auth/login", {
       email: from.email, password: from.password
     }, {
       withCredentials: true
