@@ -1,16 +1,80 @@
-# React + Vite
+# Chat-gpt Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for the Chat-gpt full-stack AI chat application.
 
-Currently, two official plugins are available:
+## What It Does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Handles login and registration screens
+- Stores current user context
+- Displays chat history and chat messages
+- Sends messages through Socket.IO
+- Uses REST calls for auth and chat management
+- Provides chat sidebar controls such as new chat, archive, and chat selection
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- Vite
+- Tailwind CSS
+- Axios
+- Socket.IO Client
+- React Router
+- Lucide React
+- React Icons
 
-## Expanding the ESLint configuration
+## Install
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+```
+
+## Run
+
+```bash
+npm run dev
+```
+
+The Vite app usually runs at:
+
+```text
+http://localhost:5173
+```
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run preview
+```
+
+## Local Backend URLs
+
+REST calls are configured in:
+
+```text
+src/Utils/serverapi.js
+```
+
+Socket.IO is configured in:
+
+```text
+src/Utils/socket.js
+```
+
+For local development, point both to your backend server. The backend currently starts on `http://localhost:3000`.
+
+## Main Folders
+
+```text
+src/
+├── Components/      # Reusable UI and chat components
+├── Context/         # User context
+├── Pages/           # Login, register, and home pages
+├── Router/          # App routes
+├── Utils/           # API and socket clients
+├── App.jsx
+├── index.css
+└── main.jsx
+```
