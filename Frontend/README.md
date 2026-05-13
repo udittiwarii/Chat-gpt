@@ -69,12 +69,12 @@ For local development, point both to your backend server. The backend currently 
 
 ```text
 src/
-├── Components/      # Reusable UI and chat components
-├── Context/         # User context
-├── Pages/           # Login, register, and home pages
-├── Router/          # App routes
-├── Utils/           # API and socket clients
-├── App.jsx
-├── index.css
-└── main.jsx
++-- Components/      # Reusable UI and chat components
++-- Context/         # User context
++-- Pages/           # Login, register, and home pages
++-- Router/          # App routes
++-- Utils/           # API and socket clients
++-- App.jsx
++-- index.css
++-- main.jsx
 ```

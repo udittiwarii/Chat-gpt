@@ -39,29 +39,29 @@ A full-stack AI chat application with authentication, chat history, real-time So
 
 ```text
 .
-├── Backend/
-│   ├── public/                 # Built frontend assets served by Express
-│   ├── src/
-│   │   ├── controllers/        # Auth, chat, and socket handlers
-│   │   ├── db/                 # MongoDB connection
-│   │   ├── middleware/         # Auth middleware
-│   │   ├── model/              # Mongoose models
-│   │   ├── routes/             # REST routes
-│   │   ├── service/            # Gemini and Pinecone services
-│   │   ├── sockets/            # Socket.IO server setup
-│   │   └── app.js              # Express app
-│   └── server.js               # HTTP server bootstrap
-├── Frontend/
-│   ├── public/
-│   └── src/
-│       ├── Components/
-│       ├── Context/
-│       ├── Pages/
-│       ├── Router/
-│       └── Utils/
-├── API.md
-├── CONTRIBUTING.md
-└── SETUP.md
++-- Backend/
+|   +-- public/                 # Built frontend assets served by Express
+|   +-- src/
+|   |   +-- controllers/        # Auth, chat, and socket handlers
+|   |   +-- db/                 # MongoDB connection
+|   |   +-- middleware/         # Auth middleware
+|   |   +-- model/              # Mongoose models
+|   |   +-- routes/             # REST routes
+|   |   +-- service/            # Gemini and Pinecone services
+|   |   +-- sockets/            # Socket.IO server setup
+|   |   +-- app.js              # Express app
+|   +-- server.js               # HTTP server bootstrap
++-- Frontend/
+|   +-- public/
+|   +-- src/
+|       +-- Components/
+|       +-- Context/
+|       +-- Pages/
+|       +-- Router/
+|       +-- Utils/
++-- API.md
++-- CONTRIBUTING.md
++-- SETUP.md
 ```
 
 ## Prerequisites
