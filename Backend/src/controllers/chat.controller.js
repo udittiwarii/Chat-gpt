@@ -4,6 +4,7 @@ const messageModel = require('../model/message.model')
 async function createChat(req, res) {
     const { title } = req.body;
 
+    console.log("Hey!")
     const user = req.user
 
     try {
@@ -17,6 +18,7 @@ async function createChat(req, res) {
             chat: newChat
         })
     } catch (err) {
+        console.log(err)
         return res.status(500).json({
             message: "Internal server error",
             err

@@ -40,6 +40,21 @@ The Vite app usually runs at:
 http://localhost:5173
 ```
 
+## Environment
+
+Create local environment values from the example:
+
+```bash
+cp .env.example .env
+```
+
+Local defaults:
+
+```text
+VITE_API_BASE_URL=http://localhost:3000/api
+VITE_SOCKET_URL=http://localhost:3000
+```
+
 ## Scripts
 
 ```bash
@@ -51,19 +66,19 @@ npm run preview
 
 ## Local Backend URLs
 
-REST calls are configured in:
+REST calls read `VITE_API_BASE_URL` from:
 
 ```text
 src/Utils/serverapi.js
 ```
 
-Socket.IO is configured in:
+Socket.IO reads `VITE_SOCKET_URL` from:
 
 ```text
 src/Utils/socket.js
 ```
 
-For local development, point both to your backend server. The backend currently starts on `http://localhost:3000`.
+For local development, point both values to your backend server. The backend currently starts on `http://localhost:3000`.
 
 ## Main Folders
 
