@@ -7,7 +7,7 @@ async function genrateContent(prompt) {
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash",
             contents: prompt,
             config: {
                 temperature: 0.7,
@@ -69,7 +69,7 @@ async function genrateTempContent(prompt) {
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash",
             contents: prompt,
             config: {
                 temperature: 0.7,
@@ -121,7 +121,7 @@ A mini fast-response version of ChatGPT for temporary chats.
 
 async function genrateTitle(prompt) {
     const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
         config: {
             temperature: 0.7,
